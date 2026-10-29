@@ -1,8 +1,131 @@
-<script>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на маникюр</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .client-booking-list { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .booking-date-group { background-color: #fff5f8; border: 1px solid #f8bbd0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 12px; }
+        .booking-date-header { background-color: #fce4ec; color: #c2185b; padding: 10px 15px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #f8bbd0; display: flex; align-items: center; gap: 8px; }
+        .booking-details-box { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .booking-time-client, .booking-service-client, .booking-master-client { font-size: 13px; display: flex; align-items: center; gap: 8px; color: #333; }
+        .master-name-badge-client { display: inline-block; background-color: #e91e63; color: white; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        
+        .cancel-booking-btn { background-color: #f44336; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-top: 8px; width: auto; align-self: flex-start; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
+        .cancel-booking-btn:hover { background-color: #d32f2f; }
+
+        .modal-overlay-client { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-card-client { background-color: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); width: 350px; text-align: center; position: relative; border-top: 5px solid #e91e63; }
+        .modal-card-client h3 { color: #c2185b; margin-top: 0; margin-bottom: 15px; font-size: 18px; }
+        .modal-card-client p { margin-bottom: 15px; font-size: 14px; color: #555; text-align: left; }
+        .close-modal-client { position: absolute; top: 10px; right: 15px; font-size: 20px; color: #999; cursor: pointer; }
+        
+        .modal-card-client select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #f8bbd0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            background-color: #fff5f8;
+            color: #c2185b;
+            font-weight: bold;
+        }
+
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-buttons button { margin-top: 0; flex: 1; }
+        .secondary-modal-btn { background-color: #9e9e9e !important; }
+        .secondary-modal-btn:hover { background-color: #757575 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="top-link">
+        <a href="master.html">Кабинет мастера ➔</a>
+    </div>
+
+    <div class="card">
+        <h2>Онлайн-запись на маникюр</h2>
+        <p>Заполните форму ниже, чтобы записаться на процедуру:</p>
+
+        <form id="booking-form">
+            <label for="name">Ваше имя:</label>
+            <input type="text" id="name" placeholder="Введите имя" required>
+
+            <label for="phone">Номер телефона:</label>
+            <input type="tel" id="phone" placeholder="+7 (999) 000-00-00" required>
+
+            <label for="service">Выберите услугу:</label>
+            <select id="service">
+                <option value="Маникюр с покрытием">Маникюр с покрытием</option>
+                <option value="Французский маникюр">Французский маникюр (Френч)</option>
+                <option value="Педикюр">Педикюр</option>
+                <option value="Снятие + Дизайн">Снятие + Дизайн</option>
+                <option value="Маникюр с Спанч Бобом">Маникюр с Спанч Бобом</option>
+            </select>
+
+            <label for="master">Выберите мастера:</label>
+            <select id="master">
+                <option value="Любой свободный мастер">Любой свободный мастер</option>
+                <option value="Анна">Анна</option>
+                <option value="Елена">Елена</option>
+            </select>
+
+            <label for="datetime">Дата и время записи:</label>
+            <input type="datetime-local" id="datetime" required>
+
+            <button type="submit">Подтвердить запись</button>
+        </form>
+
+        <hr class="divider">
+        <h3>Проверить мою запись</h3>
+        <p style="font-size: 12px; color: #888; margin-top: -10px;">Введите ваш номер телефона</p>
+        <input type="tel" id="search-phone" placeholder="Введите номер телефона">
+        <button type="button" onclick="checkClientBooking()" class="secondary-btn">Найти запись</button>
+        
+        <div id="client-result" class="result-box"></div>
+    </div>
+
+    <!-- Модальное окно 1: Подтверждение отмены -->
+    <div id="cancel-confirm-modal" class="modal-overlay-client">
+        <div class="modal-card-client">
+            <span class="close-modal-client" onclick="closeCancelConfirmModal()">&times;</span>
+            <h3>Отменить запись?</h3>
+            <p style="text-align: center;">Вы действительно хотите отменить выбранную запись?</p>
+            <div class="modal-buttons">
+                <button id="confirm-yes-btn" onclick="goToReasonModal()">Да, отменить</button>
+                <button onclick="closeCancelConfirmModal()" class="secondary-modal-btn">Назад</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно 2: Выбор причины -->
+    <div id="cancel-reason-modal" class="modal-overlay-client">
+        <div class="modal-card-client">
+            <span class="close-modal-client" onclick="closeCancelReasonModal()">&times;</span>
+            <h3>Причина отмены</h3>
+            <p>Выберите причину из списка:</p>
+            
+            <select id="cancel-reason-select">
+                <option value="1. Болезнь">1. Болезнь</option>
+                <option value="2. Отъезд">2. Отъезд</option>
+                <option value="3. Иное">3. Иное</option>
+            </select>
+
+            <div class="modal-buttons">
+                <button id="final-confirm-btn" onclick="finalCancelBooking()">Подтвердить отмену</button>
+                <button onclick="backToConfirmModal()" class="secondary-modal-btn">Назад</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
         const API_URL = 'http://localhost:3001/api/bookings';
         let currentBookingId = null;
 
-        // Установка минимального времени (нельзя записаться в прошлое)
         function setMinDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -10,7 +133,6 @@
         }
         window.onload = setMinDateTime;
 
-        // Отправка формы записи на сервер
         document.getElementById('booking-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -34,8 +156,7 @@
             const newBooking = {
                 name: document.getElementById('name').value,
                 phone: cleanPhone,
-                service: document.getElementById('service').value,
-                master: selectedMaster,
+                service: document.getElementById('service').value,master: selectedMaster,
                 datetime: selectedDatetime
             };
 
@@ -61,7 +182,6 @@
             }
         });
 
-        // Поиск записи клиента по телефону через сервер
         async function checkClientBooking() {
             const phoneInput = document.getElementById('search-phone').value.trim();
             const cleanSearchPhone = phoneInput.replace(/\D/g, '');
@@ -121,8 +241,7 @@
                             <div class="booking-service-client"><i class="fas fa-sparkles"></i> <b>Услуга:</b> ${b.service}</div>
                             <div class="booking-master-client"><i class="fas fa-user-tie"></i> <b>Мастер:</b> <span class="master-name-badge-client">${b.master}</span></div>
                             <button class="cancel-booking-btn" onclick="openCancelConfirmModal(${b.id})">
-                                <i class="fas fa-times-circle"></i> Отменить запись
-                            </button>
+                                <i class="fas fa-times-circle"></i> Отменить запись</button>
                         `;
                         dateGroup.appendChild(box);
                     });
@@ -137,7 +256,6 @@
             }
         }
 
-        // Модальные окна отмены
         function openCancelConfirmModal(id) {
             currentBookingId = id;
             document.getElementById('cancel-confirm-modal').style.display = 'flex';
@@ -178,10 +296,12 @@
 
                 alert(`Запись успешно отменена. Причина: ${reason}`);
                 closeCancelReasonModal();
-                checkClientBooking(); // Обновляем список записей
+                checkClientBooking();
             } catch (err) {
                 console.error(err);
                 alert('Ошибка соединения с сервером при отмене.');
             }
         }
     </script>
+</body>
+</html>
