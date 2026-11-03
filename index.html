@@ -4,120 +4,454 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Запись на маникюр</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            gap: 20px;
+        }
+        .container, .list-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff6b81;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4757;
+        }
+        .appointment-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .appointment-item button {
+            background-color: #e74c3c;
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .appointment-item button:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Форма записи -->
     <div class="container">
-        <h1>Запись на маникюр</h1>
-        
-        <!-- Форма записи -->
-        <form id="booking-form">
-            <label for="name">Ваше имя:</label>
-            <input type="text" id="name" required placeholder="Введите ваше имя">
+        <h2>Запись на маникюр</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="clientName">Ваше имя:</label>
+                <input type="text" id="clientName" required placeholder="Введите имя">
+            </div>
 
-            <label for="phone">Номер телефона:</label>
-            <input type="tel" id="phone" required placeholder="+79191991919">
+            <div class="form-group">
+                <label for="serviceType">Услуга:</label>
+                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
+            </div>
 
-            <label for="service">Выберите услугу:</label>
-            <select id="service" required>
-                <option value="Маникюр">Маникюр</option>
-                <option value="Педикюр">Педикюр</option>
-                <option value="Наращивание">Наращивание</option>
-            </select>
+            <div class="form-group">
+                <label for="appointmentDate">Дата и время:</label>
+                <input type="datetime-local" id="appointmentDate" required>
+            </div>
 
-            <label for="master">Выберите мастера:</label>
-            <select id="master" required>
-                <option value="Анна">Анна</option>
-                <option value="Мария">Мария</option>
-                <option value="Любой свободный мастер">Любой свободный мастер</option>
-            </select>
-
-            <label for="datetime">Дата и время записи:</label>
-            <input type="datetime-local" id="datetime" required>
-
-            <button type="submit">Подтвердить запись</button>
+            <button type="submit">Записаться</button>
         </form>
+    </div>
 
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ddd;">
-
-        <!-- Поиск записи -->
-        <div class="search-section">
-            <h2>Проверить мою запись</h2>
-            <label for="search-phone">Введите номер телефона:</label>
-            <input type="tel" id="search-phone" placeholder="Введите номер телефона">
-            <button type="button" onclick="checkClientBooking()">Найти запись</button>
-            <div id="client-result" style="margin-top: 15px;"></div>
-        </div>
+    <!-- Список записей -->
+    <div class="list-container">
+        <h2>Актуальные записи</h2>
+        <div id="appointmentsList">Загрузка...</div>
     </div>
 
     <script>
-        // Четкий адрес нашего локального сервера Node.js на порту 3001
-        const API_URL = 'http://localhost:3001/api/bookings';
+        const API_URL = 'http://localhost:3001/api/appointments';
 
-        // Обработка отправки формы записи
-        document.getElementById('booking-form').addEventListener('submit', async function(e) {
+        // Функция загрузки списка записей с сервера
+        async function loadAppointments() {
+            try {
+                const response = await fetch(API_URL);
+                const appointments = await response.json();
+                
+                const listContainer = document.getElementById('appointmentsList');
+                listContainer.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
+                    return;
+                }
+
+                appointments.forEach(app => {
+                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
+                    const item = document.createElement('div');
+                    item.className = 'appointment-item';
+                    item.innerHTML = `
+                        <strong><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на маникюр</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            gap: 20px;
+        }
+        .container, .list-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff6b81;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4757;
+        }
+        .appointment-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .appointment-item button {
+            background-color: #e74c3c;
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .appointment-item button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Форма записи -->
+    <div class="container">
+        <h2>Запись на маникюр</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="clientName">Ваше имя:</label>
+                <input type="text" id="clientName" required placeholder="Введите имя">
+            </div>
+
+            <div class="form-group">
+                <label for="serviceType">Услуга:</label>
+                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentDate">Дата и время:</label>
+                <input type="datetime-local" id="appointmentDate" required>
+            </div>
+
+            <button type="submit">Записаться</button>
+        </form>
+    </div>
+
+    <!-- Список записей -->
+    <div class="list-container">
+        <h2>Актуальные записи</h2>
+        <div id="appointmentsList">Загрузка...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api/appointments';
+
+        // Функция загрузки списка записей с сервера
+        async function loadAppointments() {
+            try {
+                const response = await fetch(API_URL);
+                const appointments = await response.json();
+                
+                const listContainer = document.getElementById('appointmentsList');
+                listContainer.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
+                    return;
+                }
+
+                appointments.forEach(app => {
+                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
+                    const item = document.createElement('div');
+                    item.className = 'appointment-item';
+                    item.innerHTML = `
+                        <strong><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на маникюр</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            gap: 20px;
+        }
+        .container, .list-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff6b81;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4757;
+        }
+        .appointment-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .appointment-item button {
+            background-color: #e74c3c;
+            margin-top: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .appointment-item button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Форма записи -->
+    <div class="container">
+        <h2>Запись на маникюр</h2>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="clientName">Ваше имя:</label>
+                <input type="text" id="clientName" required placeholder="Введите имя">
+            </div>
+
+            <div class="form-group">
+                <label for="serviceType">Услуга:</label>
+                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
+            </div>
+
+            <div class="form-group">
+                <label for="appointmentDate">Дата и время:</label>
+                <input type="datetime-local" id="appointmentDate" required>
+            </div>
+
+            <button type="submit">Записаться</button>
+        </form>
+    </div>
+
+    <!-- Список записей -->
+    <div class="list-container">
+        <h2>Актуальные записи</h2>
+        <div id="appointmentsList">Загрузка...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api/appointments';
+
+        // Функция загрузки списка записей с сервера
+        async function loadAppointments() {
+            try {
+                const response = await fetch(API_URL);
+                const appointments = await response.json();
+                
+                const listContainer = document.getElementById('appointmentsList');
+                listContainer.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
+                    return;
+                }
+
+                appointments.forEach(app => {
+                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
+                    const item = document.createElement('div');
+                    item.className = 'appointment-item';
+                    item.innerHTML = `
+                        <strong>Имя:</strong> ${app.client_name}<br>
+                        <strong>Услуга:</strong> ${app.service_type}<br>
+                        <strong>Дата:</strong> ${dateFormatted}<br>
+                        <button onclick="deleteAppointment(${app.id})">Отменить запись</button>
+                    `;
+                    listContainer.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки записей:', error);
+                document.getElementById('appointmentsList').innerHTML = '<p>Не удалось загрузить записи.</p>';
+            }
+        }
+
+        // Отправка новой записи
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const newBooking = {
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                service: document.getElementById('service').value,
-                master: document.getElementById('master').value,
-                datetime: document.getElementById('datetime').value
-            };
+            const client_name = document.getElementById('clientName').value;
+            const service_type = document.getElementById('serviceType').value;
+            const appointment_date = document.getElementById('appointmentDate').value;
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newBooking)
+                    body: JSON.stringify({ client_name, service_type, appointment_date })
                 });
 
-                const data = await response.json();
-                if (!response.ok) {
-                    alert(data.error || 'Ошибка при создании записи');
-                    return;
+                if (response.ok) {
+                    alert('Запись успешно создана!');
+                    document.getElementById('appointmentForm').reset();
+                    loadAppointments(); // Обновляем список
+                } else {
+                    alert('Ошибка при создании записи');
                 }
-
-                alert('Вы успешно записались!');
-                this.reset();
-            } catch (err) {
-                console.error(err);
-                alert('Не удалось подключиться к серверу!');
+            } catch (error) {
+                console.error('Ошибка соединения:', error);
+                alert('Не удалось подключиться к серверу.');
             }
         });
 
-        // Функция поиска записи по номеру телефона
-        async function checkClientBooking() {
-            const phoneInput = document.getElementById('search-phone').value.trim();
-            const resultDiv = document.getElementById('client-result');
-
-            if (!phoneInput) {
-                resultDiv.innerHTML = '<span style="color: #e74c3c;">Введите номер телефона для поиска</span>';
-                return;
-            }
+        // Функция удаления (отмены) записи
+        async function deleteAppointment(id) {
+            if (!confirm('Вы уверены, что хотите отменить эту запись?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/phone/${encodeURIComponent(phoneInput)}`);
-                const data = await response.json();
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
 
-                if (!response.ok) {
-                    resultDiv.innerHTML = `<span style="color: #e74c3c;">${data.error || 'Записи не найдены'}</span>`;
-                    return;
+                if (response.ok) {
+                    alert('Запись отменена.');
+                    loadAppointments(); // Обновляем список
+                } else {
+                    alert('Не удалось удалить запись.');
                 }
-
-                resultDiv.innerHTML = `
-                    <div style="background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <p><b>Услуга:</b> ${data.service}</p>
-                        <p><b>Мастер:</b> ${data.master}</p>
-                        <p><b>Дата и время:</b> ${new Date(data.datetime).toLocaleString()}</p>
-                    </div>
-                `;
-            } catch (err) {
-                console.error(err);
-                resultDiv.innerHTML = '<span style="color: #e74c3c;">Ошибка соединения с сервером</span>';
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
             }
         }
+
+        // Загружаем список при открытии страницы
+        loadAppointments();
     </script>
+
 </body>
 </html>
