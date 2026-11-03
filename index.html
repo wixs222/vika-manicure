@@ -3,455 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Запись на маникюр</title>
+    <title>Онлайн-запись на маникюр</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            gap: 20px;
+            padding: 0;
         }
-        .container, .list-container {
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Шапка с переключением */
+        header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #eee;
+        }
+
+        .nav-btn {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: #e91e63;
+            color: white;
+            border-color: #e91e63;
+        }
+
+        /* Контейнеры */
+        .card {
             background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
         }
+
         h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #111;
             text-align: center;
-            color: #333;
         }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            font-size: 14px;
             color: #666;
+            font-weight: 500;
         }
+
         input, select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 12px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        button {
+
+        input:focus {
+            border-color: #e91e63;
+        }
+
+        .btn-submit {
             width: 100%;
-            padding: 10px;
-            background-color: #ff6b81;
+            padding: 14px;
+            background-color: #e91e63;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #d81b60;
+        }
+
+        /* Карточка записи */
+        .appointment-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .appointment-info p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .btn-cancel {
+            background: #fff0f3;
+            color: #e91e63;
+            border: 1px solid #ffccd5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-cancel:hover {
+            background: #e91e63;
+            color: white;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО ОТМЕНЫ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;}
+
+        .modal {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .modal h3 {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #e91e63;
+        }
+
+        .modal p.subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 16px;
+        }
+
+        .reasons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .reason-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .reason-option:hover {
+            background: #fff0f3;
+        }
+
+        .reason-option input {
+            width: auto;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-confirm-cancel {
+            background: #e91e63;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #ff4757;
+
+        .btn-keep {
+            background: #e0e0e0;
+            color: #555;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .appointment-item {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-        .appointment-item button {
-            background-color: #e74c3c;
-            margin-top: 5px;
-            padding: 5px;
-            font-size: 14px;
-        }
-        .appointment-item button:hover {
-            background-color: #c0392b;
-        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Форма записи -->
-    <div class="container">
-        <h2>Запись на маникюр</h2>
-        <form id="appointmentForm">
-            <div class="form-group">
-                <label for="clientName">Ваше имя:</label>
-                <input type="text" id="clientName" required placeholder="Введите имя">
-            </div>
+    <header>
+        <h1 style="font-size: 20px; color: #e91e63;">Nails Booking</h1>
+        <div>
+            <button class="nav-btn active" id="btnClientView" onclick="switchView('client')">Запись</button>
+            <button class="nav-btn" id="btnMasterView" onclick="switchView('master')">Кабинет мастера</button>
+        </div>
+    </header>
 
+    <!-- Вью клиента: Форма записи -->
+    <div id="clientSection" class="card">
+        <h2>Онлайн-запись</h2>
+        <form id="bookingForm">
             <div class="form-group">
-                <label for="serviceType">Услуга:</label>
-                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
+                <label>Ваше имя</label>
+                <input type="text" id="clientName" placeholder="Имя и Фамилия" required>
             </div>
-
             <div class="form-group">
-                <label for="appointmentDate">Дата и время:</label>
+                <label>Услуга</label>
+                <select id="serviceType" required>
+                    <option value="Маникюр с покрытием">Маникюр с покрытием</option>
+                    <option value="Снятие + Маникюр">Снятие + Маникюр</option>
+                    <option value="Наращивание ногтей">Наращивание ногтей</option>
+                    <option value="Педикюр">Педикюр</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Дата и время</label>
                 <input type="datetime-local" id="appointmentDate" required>
             </div>
-
-            <button type="submit">Записаться</button>
+            <button type="submit" class="btn-submit">Записаться</button>
         </form>
     </div>
 
-    <!-- Список записей -->
-    <div class="list-container">
-        <h2>Актуальные записи</h2>
+    <!-- Вью мастера: Все записи -->
+    <div id="masterSection" class="card hidden" style="max-width: 600px;">
+        <h2>Кабинет мастера</h2>
         <div id="appointmentsList">Загрузка...</div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ОТМЕНЫ (Как на фото) -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+            <h3>Почему вы отменяете запись?</h3>
+            <p class="subtitle">Выберите одну из причин ниже</p>
+            
+            <div class="reasons-list">
+                <label class="reason-option">
+                    <input type="radio" name="cancelReason" value="Личные обстоятельства" checked>
+                    <span>Личные обстоятельства</span>
+                </label>
+                <label class="reason-option">
+                    <input type="radio" name="cancelReason" value="Изменились планы">
+                    <span>Изменились планы</span>
+                </label>
+                <label class="reason-option">
+                    <input type="radio" name="cancelReason" value="Записался по ошибке">
+                    <span>Записался по ошибке</span>
+                </label>
+                <label class="reason-option">
+                    <input type="radio" name="cancelReason" value="Не подходит время">
+                    <span>Не подходит мастер / время</span>
+                </label>
+                <label class="reason-option">
+                    <input type="radio" name="cancelReason" value="Другое">
+                    <span>Другое</span>
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-confirm-cancel" onclick="confirmDelete()">Подтвердить отмену</button>
+                <button class="btn-keep" onclick="closeCancelModal()">Назад</button>
+            </div>
+        </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:3001/api/appointments';
+        let targetAppointmentId = null;
 
-        // Функция загрузки списка записей с сервера
-        async function loadAppointments() {
-            try {
-                const response = await fetch(API_URL);
-                const appointments = await response.json();
-                
-                const listContainer = document.getElementById('appointmentsList');
-                listContainer.innerHTML = '';
-
-                if (appointments.length === 0) {
-                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
-                    return;
-                }
-
-                appointments.forEach(app => {
-                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
-                    const item = document.createElement('div');
-                    item.className = 'appointment-item';
-                    item.innerHTML = `
-                        <strong><!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Запись на маникюр</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            gap: 20px;
-        }
-        .container, .list-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #ff6b81;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ff4757;
-        }
-        .appointment-item {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-        .appointment-item button {
-            background-color: #e74c3c;
-            margin-top: 5px;
-            padding: 5px;
-            font-size: 14px;
-        }
-        .appointment-item button:hover {
-            background-color: #c0392b;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Форма записи -->
-    <div class="container">
-        <h2>Запись на маникюр</h2>
-        <form id="appointmentForm">
-            <div class="form-group">
-                <label for="clientName">Ваше имя:</label>
-                <input type="text" id="clientName" required placeholder="Введите имя">
-            </div>
-
-            <div class="form-group">
-                <label for="serviceType">Услуга:</label>
-                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
-            </div>
-
-            <div class="form-group">
-                <label for="appointmentDate">Дата и время:</label>
-                <input type="datetime-local" id="appointmentDate" required>
-            </div>
-
-            <button type="submit">Записаться</button>
-        </form>
-    </div>
-
-    <!-- Список записей -->
-    <div class="list-container">
-        <h2>Актуальные записи</h2>
-        <div id="appointmentsList">Загрузка...</div>
-    </div>
-
-    <script>
-        const API_URL = 'http://localhost:3001/api/appointments';
-
-        // Функция загрузки списка записей с сервера
-        async function loadAppointments() {
-            try {
-                const response = await fetch(API_URL);
-                const appointments = await response.json();
-                
-                const listContainer = document.getElementById('appointmentsList');
-                listContainer.innerHTML = '';
-
-                if (appointments.length === 0) {
-                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
-                    return;
-                }
-
-                appointments.forEach(app => {
-                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
-                    const item = document.createElement('div');
-                    item.className = 'appointment-item';
-                    item.innerHTML = `
-                        <strong><!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Запись на маникюр</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            gap: 20px;
-        }
-        .container, .list-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #ff6b81;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #ff4757;
-        }
-        .appointment-item {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-        .appointment-item button {
-            background-color: #e74c3c;
-            margin-top: 5px;
-            padding: 5px;
-            font-size: 14px;
-        }
-        .appointment-item button:hover {
-            background-color: #c0392b;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Форма записи -->
-    <div class="container">
-        <h2>Запись на маникюр</h2>
-        <form id="appointmentForm">
-            <div class="form-group">
-                <label for="clientName">Ваше имя:</label>
-                <input type="text" id="clientName" required placeholder="Введите имя">
-            </div>
-
-            <div class="form-group">
-                <label for="serviceType">Услуга:</label>
-                <input type="text" id="serviceType" required placeholder="Например: Маникюр с покрытием">
-            </div>
-
-            <div class="form-group">
-                <label for="appointmentDate">Дата и время:</label>
-                <input type="datetime-local" id="appointmentDate" required>
-            </div>
-
-            <button type="submit">Записаться</button>
-        </form>
-    </div>
-
-    <!-- Список записей -->
-    <div class="list-container">
-        <h2>Актуальные записи</h2>
-        <div id="appointmentsList">Загрузка...</div>
-    </div>
-
-    <script>
-        const API_URL = 'http://localhost:3001/api/appointments';
-
-        // Функция загрузки списка записей с сервера
-        async function loadAppointments() {
-            try {
-                const response = await fetch(API_URL);
-                const appointments = await response.json();
-                
-                const listContainer = document.getElementById('appointmentsList');
-                listContainer.innerHTML = '';
-
-                if (appointments.length === 0) {
-                    listContainer.innerHTML = '<p>Пока нет ни одной записи.</p>';
-                    return;
-                }
-
-                appointments.forEach(app => {
-                    const dateFormatted = new Date(app.appointment_date).toLocaleString();
-                    const item = document.createElement('div');
-                    item.className = 'appointment-item';
-                    item.innerHTML = `
-                        <strong>Имя:</strong> ${app.client_name}<br>
-                        <strong>Услуга:</strong> ${app.service_type}<br>
-                        <strong>Дата:</strong> ${dateFormatted}<br>
-                        <button onclick="deleteAppointment(${app.id})">Отменить запись</button>
-                    `;
-                    listContainer.appendChild(item);
-                });
-            } catch (error) {
-                console.error('Ошибка загрузки записей:', error);
-                document.getElementById('appointmentsList').innerHTML = '<p>Не удалось загрузить записи.</p>';
+        // Переключение режимов (Клиент / Мастер)
+        function switchView(view) {
+            if (view === 'client') {
+                document.getElementById('clientSection').classList.remove('hidden');
+                document.getElementById('masterSection').classList.add('hidden');
+                document.getElementById('btnClientView').classList.add('active');
+                document.getElementById('btnMasterView').classList.remove('active');
+            } else {
+                document.getElementById('clientSection').classList.add('hidden');
+                document.getElementById('masterSection').classList.remove('hidden');
+                document.getElementById('btnMasterView').classList.add('active');
+                document.getElementById('btnClientView').classList.remove('active');
+                loadAppointments();
             }
         }
 
-        // Отправка новой записи
-        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Загрузить записи для мастера
+        async function loadAppointments() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                const list = document.getElementById('appointmentsList');
+                list.innerHTML = '';
 
-            const client_name = document.getElementById('clientName').value;
-            const service_type = document.getElementById('serviceType').value;
-            const appointment_date = document.getElementById('appointmentDate').value;
+                if (data.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#999;">Нет активных записей.</p>';
+                    return;
+                }
+
+                data.forEach(app => {
+                    const dateFormatted = new Date(app.appointment_date).toLocaleString('ru-RU', {
+                        day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+                    });
+                    const card = document.createElement('div');
+                    card.className = 'appointment-card';
+                    card.innerHTML = `
+                        <div class="appointment-info">
+                            <strong>${app.client_name}</strong>
+                            <p>💅 ${app.service_type}</p>
+                            <p style="color:#666;">📅 ${dateFormatted}</p>
+                        </div>
+                        <button class="btn-cancel" onclick="openCancelModal(${app.id})">Отменить</button>`;
+                    list.appendChild(card);
+                });
+            } catch (err) {
+                document.getElementById('appointmentsList').innerHTML = '<p style="color:red; text-align:center;">Ошибка подключения к серверу.</p>';
+            }
+        }
+
+        // Запись
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                client_name: document.getElementById('clientName').value,
+                service_type: document.getElementById('serviceType').value,
+                appointment_date: document.getElementById('appointmentDate').value
+            };
 
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ client_name, service_type, appointment_date })
+                    body: JSON.stringify(payload)
                 });
 
-                if (response.ok) {
-                    alert('Запись успешно создана!');
-                    document.getElementById('appointmentForm').reset();
-                    loadAppointments(); // Обновляем список
+                if (res.ok) {
+                    alert('Вы успешно записались!');
+                    document.getElementById('bookingForm').reset();
                 } else {
-                    alert('Ошибка при создании записи');
+                    alert('Ошибка при создании записи.');
                 }
-            } catch (error) {
-                console.error('Ошибка соединения:', error);
-                alert('Не удалось подключиться к серверу.');
+            } catch (err) {
+                alert('Сервер недоступен. Запустите node server.js');
             }
         });
 
-        // Функция удаления (отмены) записи
-        async function deleteAppointment(id) {
-            if (!confirm('Вы уверены, что хотите отменить эту запись?')) return;
+        // Модалка отмены
+        function openCancelModal(id) {
+            targetAppointmentId = id;
+            document.getElementById('cancelModal').style.display = 'flex';
+        }
+
+        function closeCancelModal() {
+            targetAppointmentId = null;
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        // Подтверждение удаления
+        async function confirmDelete() {
+            if (!targetAppointmentId) return;
 
             try {
-                const response = await fetch(`${API_URL}/${id}`, {
+                const res = await fetch(`${API_URL}/${targetAppointmentId}`, {
                     method: 'DELETE'
                 });
 
-                if (response.ok) {
-                    alert('Запись отменена.');
-                    loadAppointments(); // Обновляем список
+                if (res.ok) {
+                    closeCancelModal();
+                    loadAppointments();
                 } else {
-                    alert('Не удалось удалить запись.');
+                    alert('Не удалось отменить запись');
                 }
-            } catch (error) {
-                console.error('Ошибка удаления:', error);
+            } catch (err) {
+                alert('Ошибка соединения с сервером');
             }
         }
-
-        // Загружаем список при открытии страницы
-        loadAppointments();
     </script>
-
 </body>
 </html>
